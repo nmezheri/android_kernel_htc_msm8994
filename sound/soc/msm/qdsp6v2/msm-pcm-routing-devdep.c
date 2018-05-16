@@ -51,6 +51,25 @@ static int msm_pcm_routing_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
 	case SNDRV_DEVDEP_DAP_IOCTL_GET_VISUALIZER:
 		ret = msm_ds2_dap_ioctl(hw, file, cmd, argp);
 		break;
+	case DTS_EAGLE_IOCTL_GET_CACHE_SIZE:
+	case DTS_EAGLE_IOCTL_SET_CACHE_SIZE:
+	case DTS_EAGLE_IOCTL_GET_PARAM:
+	case DTS_EAGLE_IOCTL_SET_PARAM:
+	case DTS_EAGLE_IOCTL_SET_CACHE_BLOCK:
+	case DTS_EAGLE_IOCTL_SET_ACTIVE_DEVICE:
+	case DTS_EAGLE_IOCTL_GET_LICENSE:
+	case DTS_EAGLE_IOCTL_SET_LICENSE:
+	case DTS_EAGLE_IOCTL_SEND_LICENSE:
+	case DTS_EAGLE_IOCTL_SET_VOLUME_COMMANDS:
+		msm_pcm_routing_acquire_lock();
+		ret = msm_dts_eagle_ioctl(cmd, arg);
+		if (ret == -EPERM) {
+			pr_err("%s called with invalid control 0x%X\n",
+				__func__, cmd);
+			ret = -EINVAL;
+		}
+		msm_pcm_routing_release_lock();
+		break;
 	default:
 		pr_err("%s called with invalid control 0x%X\n", __func__, cmd);
 		ret = -EINVAL;
@@ -84,6 +103,25 @@ static int msm_pcm_routing_hwdep_compat_ioctl(struct snd_hwdep *hw,
 		break;
 	case SNDRV_DEVDEP_DAP_IOCTL_GET_VISUALIZER32:
 		ret = msm_ds2_dap_compat_ioctl(hw, file, cmd, argp);
+		break;
+	case DTS_EAGLE_IOCTL_GET_CACHE_SIZE32:
+	case DTS_EAGLE_IOCTL_SET_CACHE_SIZE32:
+	case DTS_EAGLE_IOCTL_GET_PARAM32:
+	case DTS_EAGLE_IOCTL_SET_PARAM32:
+	case DTS_EAGLE_IOCTL_SET_CACHE_BLOCK32:
+	case DTS_EAGLE_IOCTL_SET_ACTIVE_DEVICE32:
+	case DTS_EAGLE_IOCTL_GET_LICENSE32:
+	case DTS_EAGLE_IOCTL_SET_LICENSE32:
+	case DTS_EAGLE_IOCTL_SEND_LICENSE32:
+	case DTS_EAGLE_IOCTL_SET_VOLUME_COMMANDS32:
+		msm_pcm_routing_acquire_lock();
+		ret = msm_dts_eagle_compat_ioctl(cmd, arg);
+		if (ret == -EPERM) {
+			pr_err("%s called with invalid control 0x%X\n",
+				__func__, cmd);
+			ret = -EINVAL;
+		}
+		msm_pcm_routing_release_lock();
 		break;
 	default:
 		pr_err("%s called with invalid control 0x%X\n", __func__, cmd);
